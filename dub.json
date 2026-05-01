@@ -24,12 +24,24 @@
 
 	"configurations": [
 		{
+			"name": "http",
+			"subConfigurations": {
+				"arsd-official:cgi": "embedded_httpd"
+			},
+			"targetType": "executable"
+		},
+		{
 			"name": "cgi",
 			"subConfigurations": {
 				"arsd-official:cgi": "cgi"
 			},
 			"targetType": "executable",
 			"versions": ["plain_cgi"]
+		},
+		{
+			"name": "lib",
+			"targetType": "library",
+			"excludedSourceFiles": ["src/app.d"]
 		}
 	],
 
