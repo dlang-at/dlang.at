@@ -1,0 +1,26 @@
+name: Test
+on: [push, pull_request]
+
+jobs:
+  test:
+    name: Tests
+
+    strategy:
+      matrix:
+        os: [ubuntu-latest]
+        dc: [ldc-1.42.0]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v6
+
+      - name: Install D compiler
+        uses: dlang-community/setup-dlang@0a7469b93f791d83f30932c6fd105796c6966e20
+        with:
+          compiler: ${{ matrix.dc }}
+
+      - name: Run unittests
+        run: dub -q test
+
+      - name: Build CGI application
+        run: dub -q build -b CI-CD -c cgi
