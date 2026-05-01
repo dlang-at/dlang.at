@@ -23,6 +23,7 @@ jobs:
         uses: actions/upload-artifact@v7
         with:
           name: built-application
+          include-hidden-files: true
           path: bin
 
 
