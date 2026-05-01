@@ -20,7 +20,7 @@ jobs:
         run: dub -q build -b CI/CD -c cgi
 
       - name: Upload artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         with:
           name: built-application
           path: bin
@@ -33,7 +33,7 @@ jobs:
 
     steps:
       - name: Download artifacts
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@v7
         with:
           name: built-application
           path: bin
@@ -44,14 +44,14 @@ jobs:
           SSH_HOST_KEY: ${{ secrets.SSH_HOST_KEY }}
           SSH_HOST_NAME: ${{ secrets.SSH_HOST_NAME }}
           SSH_USER_KEY: ${{ secrets.SSH_USER_KEY }}
-          SSH_USER_KEY_PATH: ~/.ssh/gha_user_key
+          SSH_USER_KEY_FILENAME: gha_user_key
         run: |
-          mkdir -p ~/.ssh
-          echo "${SSH_HOST_NAME} ${SSH_HOST_KEY}" >> ~/.ssh/known_hosts
-          echo "${SSH_USER_KEY}"  > "${SSH_USER_KEY_PATH}"
-          chmod 600 ~/.ssh/gha_user_key
+          mkdir -p "${HOME}/.ssh"
+          echo "${SSH_HOST_NAME} ${SSH_HOST_KEY}" >> "${HOME}/.ssh/known_hosts"
+          echo "${SSH_USER_KEY}" > "${HOME}/.ssh/${SSH_USER_KEY_FILENAME}"
+          chmod 600 "${HOME}/.ssh/${SSH_USER_KEY_FILENAME}"
           ssh-agent -a "${SSH_AUTH_SOCK}" > /dev/null	
-          ssh-add ~/.ssh/gha_user_key
+          ssh-add "${HOME}/.ssh/${SSH_USER_KEY_FILENAME}"
 
       - name: Deploy app via rsync
         env:
