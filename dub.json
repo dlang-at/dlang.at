@@ -38,6 +38,7 @@
 			"subConfigurations": {
 				"arsd-official:cgi": "cgi"
 			},
+			"targetName": "index.cgi",
 			"targetType": "executable",
 			"versions": ["plain_cgi"]
 		},
