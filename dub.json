@@ -32,6 +32,9 @@
 		},
 		{
 			"name": "cgi",
+			"copyFiles": [
+				"deploy/apache-httpd-cgi/.htaccess"
+			],
 			"subConfigurations": {
 				"arsd-official:cgi": "cgi"
 			},
