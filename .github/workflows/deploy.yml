@@ -17,13 +17,12 @@ jobs:
           compiler: ldc-1.42.0
 
       - name: Build app
-        run: dub -q build -b CI/CD -c cgi
+        run: dub -q build -b CI/CD -c http
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v7
         with:
           name: built-application
-          include-hidden-files: true
           path: bin
 
 
@@ -38,6 +37,9 @@ jobs:
         with:
           name: built-application
           path: bin
+
+      - name: Mark as binary as executable
+        run: chmod 0750 bin/dlang-at
 
       - name: Set up SSH
         env:
@@ -54,10 +56,26 @@ jobs:
           ssh-agent -a "${SSH_AUTH_SOCK}" > /dev/null	
           ssh-add "${HOME}/.ssh/${SSH_USER_KEY_FILENAME}"
 
-      - name: Deploy app via rsync
+      - name: Unlink old app binary
         env:
           SSH_AUTH_SOCK: /tmp/ssh-agent.sock
-          SSH_DEST_DIR: ${{ secrets.SSH_DEST_DIR }}
+          SSH_DEST_PATH: ${{ secrets.SSH_DEST_PATH }}
           SSH_HOST_NAME: ${{ secrets.SSH_HOST_NAME }}
           SSH_USER_NAME: ${{ secrets.SSH_USER_NAME }}
-        run: rsync --delete -zqr bin/ "${SSH_USER_NAME}@${SSH_HOST_NAME}:${SSH_DEST_DIR}"
+        run: ssh "${SSH_USER_NAME}@${SSH_HOST_NAME}" -- unlink "${SSH_DEST_PATH}" || true
+
+      - name: Deploy new binary via rsync
+        env:
+          SSH_AUTH_SOCK: /tmp/ssh-agent.sock
+          SSH_DEST_PATH: ${{ secrets.SSH_DEST_PATH }}
+          SSH_HOST_NAME: ${{ secrets.SSH_HOST_NAME }}
+          SSH_USER_NAME: ${{ secrets.SSH_USER_NAME }}
+        run: rsync -zqp bin/dlang-at "${SSH_USER_NAME}@${SSH_HOST_NAME}:${SSH_DEST_PATH}"
+
+      - name: Restart service unit
+        env:
+          SSH_APP_SERVICE_UNIT: ${{ secrets.SSH_APP_SERVICE_UNIT }}
+          SSH_AUTH_SOCK: /tmp/ssh-agent.sock
+          SSH_HOST_NAME: ${{ secrets.SSH_HOST_NAME }}
+          SSH_USER_NAME: ${{ secrets.SSH_USER_NAME }}
+        run: ssh "${SSH_USER_NAME}@${SSH_HOST_NAME}" -- systemctl --user restart "${SSH_APP_SERVICE_UNIT}"
