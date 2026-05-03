@@ -25,5 +25,5 @@ jobs:
       - name: Run unittests
         run: dub -q test  -b CI/CD -c lib
 
-      - name: Build CGI application
-        run: dub -q build -b CI/CD -c cgi
+      - name: Build HTTP application
+        run: dub -q build -b CI/CD -c http
